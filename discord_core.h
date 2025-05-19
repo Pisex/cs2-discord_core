@@ -41,9 +41,34 @@ private:
     CCallResult< discord_core, HTTPRequestCompleted_t > m_httpRequestCallback;
 };
 
-class DiscordApi : public IDiscordApi {
+class DiscordWebhookApi : public IDiscordWebhookApi {
 public:
-    void SendWebHook(const char* szWebHookName, const char* szContent, std::vector<Embed*> hEmbeds);
+    void SendWebHook(const char* szWebHook, const char* szContent, std::vector<Embed*> hEmbeds);
+};
+
+class DiscordBotApi : public IDiscordBotApi {
+public:
+    void SendMessage(DiscordBot* pBot, const char* szChannelID, const char* szContent, std::vector<Embed*> hEmbeds, DiscordCallback callback);
+    void DeleteMessage(DiscordBot* pBot, const char* szChannelID, const char* szMessageID, DiscordCallback callback);
+    void EditMessage(DiscordBot* pBot, const char* szChannelID, const char* szMessageID, const char* szContent, std::vector<Embed*> hEmbeds, DiscordCallback callback);
+    void PinMessage(DiscordBot* pBot, const char* szChannelID, const char* szMessageID, DiscordCallback callback);
+    void UnpinMessage(DiscordBot* pBot, const char* szChannelID, const char* szMessageID, DiscordCallback callback);
+    void GetMessage(DiscordBot* pBot, const char* szChannelID, const char* szMessageID, DiscordCallback callback);
+    void GetMessages(DiscordBot* pBot, const char* szChannelID, int iLimit, const char* szBefore, const char* szAfter, DiscordCallback callback);
+    void GetPinnedMessages(DiscordBot* pBot, const char* szChannelID, DiscordCallback callback);
+    
+    void AddReaction(DiscordBot* pBot, const char* szChannelID, const char* szMessageID, const char* emoji, DiscordCallback callback);
+    void RemoveReaction(DiscordBot* pBot, const char* szChannelID, const char* szMessageID, const char* emoji, DiscordCallback callback);
+
+    void AddRole(DiscordBot* pBot, const char* szGuildID, const char* szUserID, const char* szRoleID, DiscordCallback callback);
+    void RemoveRole(DiscordBot* pBot, const char* szGuildID, const char* szUserID, const char* szRoleID, DiscordCallback callback);
+
+    void GetGuildMember(DiscordBot* pBot, const char* szGuildID, const char* szUserID, DiscordCallback callback);
+    void GetGuildMembers(DiscordBot* pBot, const char* szGuildID, int iLimit, const char* szAfter, DiscordCallback callback);
+    void GetGuildRoles(DiscordBot* pBot, const char* szGuildID, DiscordCallback callback);
+    void GetGuildChannels(DiscordBot* pBot, const char* szGuildID, DiscordCallback callback);
+    void GetGuildEmojis(DiscordBot* pBot, const char* szGuildID, DiscordCallback callback);
+    void GetGuildInvites(DiscordBot* pBot, const char* szGuildID, DiscordCallback callback);
 };
 
 #endif //_INCLUDE_METAMOD_SOURCE_STUB_PLUGIN_H_

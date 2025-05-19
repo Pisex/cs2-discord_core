@@ -1,6 +1,7 @@
 #pragma once
 
-#define DISCORD_INTERFACE "IDiscordApi"
+#define DISCORD_WEBHOOK_INTERFACE "IDiscordWebhookApi"
+#define DISCORD_BOT_INTERFACE "IDiscordBotApi"
 
 class Embed
 {
@@ -40,23 +41,41 @@ public:
     }
 
     const char* GetAuthorName() const {
-        return m_szAuthorName;
+        if (m_szAuthorName.empty()) {
+            return nullptr;
+        }
+        return m_szAuthorName.c_str();
     }
     const char* GetAuthorURL() const {
-        return m_szAuthorURL;
+        if (m_szAuthorURL.empty()) {
+            return nullptr;
+        }
+        return m_szAuthorURL.c_str();
     }
     const char* GetAuthorIcon() const {
-        return m_szAuthorIcon;
+        if (m_szAuthorIcon.empty()) {
+            return nullptr;
+        }
+        return m_szAuthorIcon.c_str();
     }
 
     const char* GetTitle() const {
-        return m_szTitle;
+        if (m_szTitle.empty()) {
+            return nullptr;
+        }
+        return m_szTitle.c_str();
     }
     const char* GetDescription() const {
-        return m_szDescription;
+        if (m_szDescription.empty()) {
+            return nullptr;
+        }
+        return m_szDescription.c_str();
     }
     const char* GetURL() const {
-        return m_szURL;
+        if (m_szURL.empty()) {
+            return nullptr;
+        }
+        return m_szURL.c_str();
     }
     int GetColor() const {
         return m_iColor;
@@ -67,39 +86,91 @@ public:
     }
 
     const char* GetImage() const {
-        return m_szImage;
+        if (m_szImage.empty()) {
+            return nullptr;
+        }
+        return m_szImage.c_str();
     }
     const char* GetThumbnail() const {
-        return m_szThumbnail;
+        if (m_szThumbnail.empty()) {
+            return nullptr;
+        }
+        return m_szThumbnail.c_str();
     }
 
     const char* GetFooterText() const {
-        return m_szFooterText;
+        if (m_szFooterText.empty()) {
+            return nullptr;
+        }
+        return m_szFooterText.c_str();
     }
     const char* GetFooterIcon() const {
-        return m_szFooterIcon;
+        if (m_szFooterIcon.empty()) {
+            return nullptr;
+        }
+        return m_szFooterIcon.c_str();
     }
 private:
-    const char* m_szAuthorName = nullptr;
-    const char* m_szAuthorURL = nullptr;
-    const char* m_szAuthorIcon = nullptr;
+    std::string m_szAuthorName;
+    std::string m_szAuthorURL;
+    std::string m_szAuthorIcon;
 
-    const char* m_szTitle = nullptr;
-    const char* m_szDescription = nullptr;
-    const char* m_szURL = nullptr;
+    std::string m_szTitle;
+    std::string m_szDescription;
+    std::string m_szURL;
     int m_iColor = 0xFFFFFF;
 
     std::vector<std::tuple<std::string, std::string, bool>> m_hFields;
 
-    const char* m_szImage = nullptr;
-    const char* m_szThumbnail = nullptr;
+    std::string m_szImage;
+    std::string m_szThumbnail;
 
-    const char* m_szFooterText = nullptr;
-    const char* m_szFooterIcon = nullptr;
+    std::string m_szFooterText;
+    std::string m_szFooterIcon;
 };
 
-class IDiscordApi
+class IDiscordWebhookApi
 {
 public:
-    virtual void SendWebHook(const char* szWebHookName, const char* szContent, std::vector<Embed*> hEmbeds) = 0;
+    virtual void SendWebHook(const char* szWebHook, const char* szContent, std::vector<Embed*> hEmbeds) = 0;
+};
+
+class DiscordBot
+{
+public:
+    explicit DiscordBot(const std::string& token)
+        : m_token(token) {}
+
+    const std::string& GetToken() const { return m_token; }
+private:
+    std::string m_token;
+};
+
+typedef std::function<void(int iStatusCode, const char* szResponse)> DiscordCallback;
+
+class IDiscordBotApi
+{
+public:
+    virtual void SendMessage(DiscordBot* pBot, const char* szChannelID, const char* szContent, std::vector<Embed*> hEmbeds, DiscordCallback callback) = 0;
+    virtual void DeleteMessage(DiscordBot* pBot, const char* szChannelID, const char* szMessageID, DiscordCallback callback) = 0;
+    virtual void EditMessage(DiscordBot* pBot, const char* szChannelID, const char* szMessageID, const char* szContent, std::vector<Embed*> hEmbeds, DiscordCallback callback) = 0;
+    virtual void PinMessage(DiscordBot* pBot, const char* szChannelID, const char* szMessageID, DiscordCallback callback) = 0;
+    virtual void UnpinMessage(DiscordBot* pBot, const char* szChannelID, const char* szMessageID, DiscordCallback callback) = 0;
+    
+    virtual void GetMessage(DiscordBot* pBot, const char* szChannelID, const char* szMessageID, DiscordCallback callback) = 0;
+    virtual void GetMessages(DiscordBot* pBot, const char* szChannelID, int iLimit, const char* szBefore, const char* szAfter, DiscordCallback callback) = 0;
+    virtual void GetPinnedMessages(DiscordBot* pBot, const char* szChannelID, DiscordCallback callback) = 0;
+
+    virtual void AddReaction(DiscordBot* pBot, const char* szChannelID, const char* szMessageID, const char* emoji, DiscordCallback callback) = 0;
+    virtual void RemoveReaction(DiscordBot* pBot, const char* szChannelID, const char* szMessageID, const char* emoji, DiscordCallback callback) = 0;
+
+    virtual void AddRole(DiscordBot* pBot, const char* szGuildID, const char* szUserID, const char* szRoleID, DiscordCallback callback) = 0;
+    virtual void RemoveRole(DiscordBot* pBot, const char* szGuildID, const char* szUserID, const char* szRoleID, DiscordCallback callback) = 0;
+
+    virtual void GetGuildMember(DiscordBot* pBot, const char* szGuildID, const char* szUserID, DiscordCallback callback) = 0;
+    virtual void GetGuildMembers(DiscordBot* pBot, const char* szGuildID, int iLimit, const char* szAfter, DiscordCallback callback) = 0;
+    virtual void GetGuildRoles(DiscordBot* pBot, const char* szGuildID, DiscordCallback callback) = 0;
+    virtual void GetGuildChannels(DiscordBot* pBot, const char* szGuildID, DiscordCallback callback) = 0;
+    virtual void GetGuildEmojis(DiscordBot* pBot, const char* szGuildID, DiscordCallback callback) = 0;
+    virtual void GetGuildInvites(DiscordBot* pBot, const char* szGuildID, DiscordCallback callback) = 0;
 };
